@@ -14,11 +14,11 @@
 - 建模/MG/标签/材质等相关小工具
 ​
 # How to Use--使用
-在可读写路径中安装插件(%AppData%\Maxon\Maxon Cinema 4D R2x_xxxxxxxx\plugin)
-默认快捷键为 ~ 飘号键(Tab上方键)
-如果快捷键失效，切换中英文输入法
-仍然无效，检查是否安装正常，检查是否有快捷键冲突(Shift + F12,输入RenderFlow查看)
-仍然无效，按Shift + F10，唤出Console控制台查看Python部分报错
+- 在可读写路径中安装插件(%AppData%\Maxon\Maxon Cinema 4D R2x_xxxxxxxx\plugin)
+- 默认快捷键为 ~ 飘号键(Tab上方键)
+- 如果快捷键失效，切换中英文输入法
+- 仍然无效，检查是否安装正常，检查是否有快捷键冲突(Shift + F12,输入RenderFlow查看)
+- 仍然无效，按Shift + F10，唤出Console控制台查看Python部分报错
 
 
 ### 由于使用NodeAssetInterface api ，R25以下版本会报错, 暂时没有做低版本兼容
