@@ -51,3 +51,6 @@
 - 多通道EXR默认为DWAB格式,节省磁盘空间
 - Octane Tag现在会自动跟随对象名称(Alt执行模式)
 - 跟随custom Shortcut api更新
+
+# 1007
+- 适配PluginManager细微调整
