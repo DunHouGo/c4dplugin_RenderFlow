@@ -87,6 +87,11 @@ ord(): str => ASCII
 
 strokeData: list[tuple[int, int]]
 """
+
+# Windows ID
+OBJECT_MANAGER = 100004709
+TIMELINE_MANAGER = 465001516
+
 #=============================================
 #                    Class
 #=============================================
@@ -102,10 +107,10 @@ strokeData: list[tuple[int, int]]
 6.KeySequence转换StrokeData
 7.检测快捷键是否已经绑定给指定插件
 8.为插件添加快捷键(监测快捷键指认)
-
+9.打印index信息
 """
 class ShortCut():
-    # 0.init
+    # 0.init function
     def __init__(self) -> None:
         # print("Custom shortcut library import success!")
         pass
@@ -134,8 +139,10 @@ class ShortCut():
         # We can still read all the other things which are written into an input event container, as
         # for example a modifier key state.
         print (f"{bc[c4d.BFM_INPUT_QUALIFIER]}")  
+    # 获取快捷键
+    #def GetS
     # 1.获取插件快捷键元组列表
-    def GetPluginShortcuts(self,pluginID: int , print_console: bool = False) -> list[list[tuple[int]]]:
+    def GetPluginShortcuts(self, pluginID: int , print_console: bool = False) -> list[list[tuple[int]]]:
         """Retrieves the shortcuts for a plugin-id.
 
         Args:
@@ -173,7 +180,7 @@ class ShortCut():
             result = None
         return result
     # 2.获取快捷键全局序号(序号,不存在时返回False)
-    def CheckShortcurIndex(self, keySequence: list[typing.Union[int, str]], 
+    def CheckShortcurIndex(self,keySequence: list[typing.Union[int, str]], 
                     managerId: typing.Optional[int] = None,
                     pluginId: typing.Optional[int] = None) -> bool:
         """
@@ -260,7 +267,7 @@ class ShortCut():
             qualifier (int): modifier key 
             key (int): ascii code of key
         """
-        index = ShortCut.CheckShortcurIndex(keySequence,managerId,pluginId)
+        index = self.CheckShortcurIndex(keySequence,managerId,pluginId)
         
         try:
             if index:
@@ -269,7 +276,7 @@ class ShortCut():
             print ("Shortcut Remove Failed")
             return False   
     # 4.获取快捷键指认的插件id和管理器id
-    def FindShortcutAssign(self,keySequence: list[typing.Union[int, str]]) -> bool:
+    def FindShortcutAssign(self,keySequence: list[typing.Union[int, str]],managerId: typing.Optional[int] = None,pluginId: typing.Optional[int] = None) -> bool:
         """
         Finds a shortcut assigned plugin id and name
             
@@ -327,7 +334,7 @@ class ShortCut():
     # 5.添加快捷键到对应的插件id和管理器id(可选)     
     def AddShortCut(self,keySequence: list[typing.Union[int, str]], 
                     pluginId,
-                    managerId: typing.Optional[int] = None,
+                    managerId: typing.Optional[int] = 0,
                     ) -> bool:
         """
         Add Shortcut by given qualifier and key to given ID  
@@ -367,7 +374,7 @@ class ShortCut():
         # Define shortcut container
         bc = c4d.BaseContainer()
         bc.SetInt32(c4d.SHORTCUT_PLUGINID, pluginId)
-        bc.SetLong(c4d.SHORTCUT_ADDRESS, 0)
+        bc.SetLong(c4d.SHORTCUT_ADDRESS, managerId)
         bc.SetLong(c4d.SHORTCUT_OPTIONMODE, 0)
         # User defined key
         bc.SetLong(0, qualifier)
@@ -378,6 +385,20 @@ class ShortCut():
     # 6.KeySequence转换StrokeData
     #   ++》[c4d.QUALIFIER_SHIFT, '1'] => Output [(1, 49)]
     def KeySequencetoStrokeData(self,keySequence: list[typing.Union[int, str]]):
+        """
+        Convert Example: 
+        1.[c4d.QUALIFIER_SHIFT, '1'] => Output [(1, 49)]
+        2.[c4d.QUALIFIER_SHIFT, c4d.QUALIFIER_ALT, "S", "T"] => Output [(5,83),(0,84)]
+
+        Alt : c4d.QUALIFIER_ALT = 4
+        
+        Ctrl : c4d.QUALIFIER_CTRL = 2
+        
+        Shift : c4d.QUALIFIER_SHIFT = 1
+
+        Returns:
+            _type_: _description_
+        """
         strokeData: list[tuple[int, int]] = []
         # A variable to OR together the qualifiers for the current key stroke.
         currentModifiers: int = 0
@@ -427,6 +448,54 @@ class ShortCut():
                     self.AddShortCut(keySequence,pluginId)
                 except:
                     raise RuntimeError("Shortcut assign Failed")
+    # 9.打印index信息
+    def PrintShortcutInfo(self, shortIndex:int):
+        for i in shortIndex:
+            bc: c4d.BaseContainer = c4d.gui.GetShortcut(i)        
+            print("Index : ", i)
+            print("Shortcut : ",c4d.gui.Shortcut2String(bc[0], bc[1]))
+            print("PluginID : ",bc[1000])
+            print("ManagerId : ",bc[1001])
+            print("----------")
+# exe 简化修饰键
+def GetKeyMod() -> str :
+    """
+    Get the key str combine with the modifiers
+
+    Returns:
+        str: string with modifier key plus by + . (no space)
+        1: 'Alt+Ctrl+Shift'
+        2: 'Ctrl+Shift'
+        3: 'Alt+Shift'
+        4: 'Alt+Ctrl'
+        5: 'Shift'
+        6: 'Ctrl'
+        7: 'Alt'
+        8: 'None'
+    """
+    bc = c4d.BaseContainer()
+    keyMod = "None" 
+    if c4d.gui.GetInputState(c4d.BFM_INPUT_KEYBOARD,c4d.BFM_INPUT_CHANNEL,bc):
+        if bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QSHIFT:
+            if bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QCTRL: # Ctrl + Shift
+                if bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QALT: # Alt + Ctrl + Shift
+                    keyMod = 'Alt+Ctrl+Shift'
+                else: # Shift + Ctrl
+                    keyMod = 'Ctrl+Shift'
+            elif bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QALT: # Alt + Shift
+                keyMod = 'Alt+Shift'
+            else: # Shift
+                keyMod = 'Shift'
+        elif bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QCTRL:
+            if bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QALT: # Alt + Ctrl
+                keyMod = 'Alt+Ctrl'
+            else: # Ctrl
+                keyMod = 'Ctrl'
+        elif bc[c4d.BFM_INPUT_QUALIFIER] & c4d.QALT: # Alt
+            keyMod = 'Alt'
+        else: # No modifier
+            keyMod = 'None'
+        return keyMod
 
 # # Examples
 # # Shortcut Assgn when Start C4D
@@ -450,7 +519,7 @@ class ShortCut():
 #     # Remove the path we've just inserted.
 #     sys.path.pop(0)
 
-# PLUGINS
+# PLUGINS Codes
 
 # # $ Shortcut Register
 # # Check shortcut add add ~ to this Plunin    
