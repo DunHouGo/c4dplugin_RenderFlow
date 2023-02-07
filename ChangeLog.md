@@ -60,3 +60,8 @@
 # 1008
 - 更改Folder结构，删除绑定的默认相机
 - 修复Folder自动图层Bug
+
+# 1009
+- RenderPath：当渲染器为Octane时，设置info sampleing mode为without filtering（对Alpha取消AA）
+- 注意：这个设置会禁用DOF和运动模糊（为了Z Depth通道更完美），如果需要，改回Distributed Rays即可
+- 可编辑对象的材质默认为UVW projection（修复默认球形投射）
