@@ -63,7 +63,7 @@ doc = c4d.documents.GetActiveDocument()
 #=============================================
 # 确认当前渲染器是Redshift 
 # 且首选项设置为Node材质
-def RedshiftNodeBased():
+def RedshiftNodeBased(doc):
     """
     1.Check current Render Engine is Redshift
     2.Pereference Redshift material type is Node 
@@ -179,6 +179,9 @@ class RedshiftNodeMaterial:
             if self.graph is None:
                 print("[WARNING] Node space is not found in Node Material: %s" % self.material.GetName())
 
+    def SetNodeMaterial(material):
+        return RedshiftNodeMaterial(material)
+    
 # =====  Add  ===== #
 
     # 创建材质 ==> OK
@@ -744,7 +747,7 @@ class RedshiftNodeMaterial:
             Output port id of the source shader node.
         """
         endNode = self.GetRSOutput()        
-        return self.AddConnection(soure_node, outPort, endNode, OutputSurfacePortID) is not None
+        return self.AddConnection(soure_node, outPort, endNode, OutputSurfacePortID)
     # 连接到Output置换接口
     def AddtoDisplacement(self, soure_node, outPort):
         """
